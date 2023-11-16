@@ -36,29 +36,29 @@ public class PhysicalCompute {
         for (int i = 0; i < 6 + 1; i++) {
             for (int j = i + 1; j < 6 + 1; j++) {
                 if (balls[i].collideWith(balls[j])) {
-                    temp = balls[i].vx;
-                    balls[i].vx = balls[j].vx;
-                    balls[j].vx = temp;
-                    
-                    /*
-                    * k = atan(y-y/x-x)
-                    * 这里写碰撞算法
-                    *
-                    *
-                    *
-                    *
-                    *
-                    *
-                    *
-                    * */
+                    double ky = balls[j].realY - balls[i].realY;
+                    double kx = balls[j].realX - balls[i].realX;
+                    Speed p = collideAlgorithm(balls[i].vx, balls[i].vy, balls[j].vx, balls[j].vy, kx, ky);
+                    balls[i].vx = p.v1x;
+                    balls[i].vy = p.v1y;
+                    balls[j].vx = p.v2x;
+                    balls[j].vy = p.v2y;
                 }
             }
         }
     }
 
-    public void collideAlgorithm(double v1x, double v1y, double v2x, double v2y, double kx, double ky){
-        //
+    private Speed collideAlgorithm(double v1x, double v1y, double v2x, double v2y, double kx, double ky) {
+        double t = v2x * kx + v2y * ky - v1x * kx - v1y * ky;
+        double s = kx * kx + ky * ky;
+        Speed p = new Speed();
+        p.v1x = v1x + t * kx / s;
+        p.v1y = v1y + t * ky / s;
+        p.v2x = v2x - t * kx / s;
+        p.v2y = v2y - t * ky / s;
+        return p;
     }
+
     public void checkHitWall(Ball ball) {
         if (ball.x < gB.OX | ball.x > gB.OX + gB.tableWidth) {
             ball.vx = -ball.vx;
@@ -77,4 +77,10 @@ public class PhysicalCompute {
             }
         }
     }
+}
+class Speed {
+    double v1x;
+    double v1y;
+    double v2x;
+    double v2y;
 }
