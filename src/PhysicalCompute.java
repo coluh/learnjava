@@ -1,35 +1,31 @@
 public class PhysicalCompute {
     GameBody gB;
     final double u = 0.003;
-    Ball[] balls = new Ball[21+1];
+    Ball[] balls = new Ball[21 + 1];
 
     public PhysicalCompute(GameBody gB) {
         this.gB = gB;
-        for (int i = 0; i < gB.balls.length; i++) {
-            this.balls[i] = gB.balls[i];
-        }
+        System.arraycopy(gB.balls, 0, this.balls, 0, gB.balls.length);
         this.balls[gB.balls.length] = gB.whiteBall;
     }
 
     public void move() {
-        for (int i = 0; i < balls.length; i++) {
-            if(balls[i].isInHole){
+        for (Ball ball : balls) {
+            if (ball.isInHole) {
                 continue;
             }
-            balls[i].realX += balls[i].vx;
-            balls[i].realY += balls[i].vy;
-            balls[i].x = (int) balls[i].realX;
-            balls[i].y = (int) balls[i].realY;
-            balls[i].ax = balls[i].afx - u * balls[i].vx;
-            balls[i].ay = balls[i].afy - u * balls[i].vy;
-            balls[i].vx += balls[i].ax;
-            balls[i].vy += balls[i].ay;
-            if (Math.pow(Math.abs(balls[i].vx), 2) + Math.pow(Math.abs(balls[i].vy), 2) < 0.005) {
-                balls[i].vx = 0;
-                balls[i].vy = 0;
+            ball.x += ball.vx;
+            ball.y += ball.vy;
+            ball.ax = ball.afx - u * ball.vx;
+            ball.ay = ball.afy - u * ball.vy;
+            ball.vx += ball.ax;
+            ball.vy += ball.ay;
+            if (Math.pow(Math.abs(ball.vx), 2) + Math.pow(Math.abs(ball.vy), 2) < 0.005) {
+                ball.vx = 0;
+                ball.vy = 0;
             }
-            checkHitWall(balls[i]);
-            checkInHole(balls[i]);
+            checkHitWall(ball);
+            checkInHole(ball);
         }
         checkHitBall();
         gB.repaint();
@@ -39,8 +35,12 @@ public class PhysicalCompute {
         for (int i = 0; i < balls.length; i++) {
             for (int j = i + 1; j < balls.length; j++) {
                 if (!(balls[i].isInHole || balls[j].isInHole) && balls[i].collideWith(balls[j])) {
-                    double ky = balls[j].realY - balls[i].realY;
-                    double kx = balls[j].realX - balls[i].realX;
+                    double ky = balls[j].y - balls[i].y;
+                    double kx = balls[j].x - balls[i].x;
+                    balls[i].x -= kx / 10;
+                    balls[i].y -= ky / 10;
+                    balls[j].x += kx / 10;
+                    balls[j].y += ky / 10;
                     Speed p = collideAlgorithm(balls[i].vx, balls[i].vy, balls[j].vx, balls[j].vy, kx, ky);
                     balls[i].vx = p.v1x;
                     balls[i].vy = p.v1y;
@@ -80,15 +80,13 @@ public class PhysicalCompute {
             }
         }
     }
-    public void checkInHole(Ball ball){
+
+    public void checkInHole(Ball ball) {
         for (int ix = 60; ix < 700; ix += 290) {
-            //int holeR = 7;
-            int holeR = 12;
-            if((Math.pow(Math.abs(ball.x - ix), 2) + Math.pow(Math.abs(ball.y-90), 2) < Math.pow(holeR, 2)) || (Math.pow(Math.abs(ball.x - ix), 2) + Math.pow(Math.abs(ball.y-(94+ gB.tableHeight)), 2) < Math.pow(holeR, 2))){
+            if ((Math.pow(Math.abs(ball.x - ix), 2) + Math.pow(Math.abs(ball.y - 90), 2) < Math.pow(gB.holeR, 2)) || (Math.pow(Math.abs(ball.x - ix), 2) + Math.pow(Math.abs(ball.y - (94 + gB.tableHeight)), 2) < Math.pow(gB.holeR, 2))) {
                 ball.isInHole = true;
+                break;
             }
-            //gOff.fillOval(ix - holeR, 90 - holeR, 2 * holeR, 2 * holeR);
-            //gOff.fillOval(ix - holeR, 94 + tableHeight - holeR, 2 * holeR, 2 * holeR);
         }
     }
 }

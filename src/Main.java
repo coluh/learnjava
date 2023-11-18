@@ -14,9 +14,9 @@ public class Main {
                 System.exit(0);
             }
         });
-        boolean isPlaying = true;
-        while (isPlaying) {
+        while (gBody.isPlaying) {
             gBody.play();
         }
+        System.exit(0);
     }
 }

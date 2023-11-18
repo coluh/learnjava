@@ -11,7 +11,7 @@ public class WhiteBall extends Ball {
     public final Point windowPos;
     private final GameBody gB;
     Color color = Color.WHITE;
-    int lastX, lastY;
+    double lastX, lastY;
     public boolean whiteOK = false;
     public boolean showLine = false;
     private final MouseListener m1 = new MouseAdapter() {
@@ -19,8 +19,8 @@ public class WhiteBall extends Ball {
         public void mouseClicked(MouseEvent e) {
 //            super.mouseClicked(e);
             mousePos = e.getLocationOnScreen();
-            realX = (double) mousePos.x - windowPos.x;
-            realY = (double) mousePos.y - windowPos.y;
+            x = (double) mousePos.x - windowPos.x;
+            y = (double) mousePos.y - windowPos.y;
             whiteOK = true;
 //            System.out.println("Nice");
             gB.removeMouseMotionListener(m2);
@@ -53,10 +53,15 @@ public class WhiteBall extends Ball {
     @Override
     public void paintSelf(Graphics g) {
         g.setColor(color);
-        g.fillOval(x - ballR, y - ballR, 2 * ballR, 2 * ballR);
+        g.fillOval((int) (x - ballR), (int) (y - ballR), 2 * ballR, 2 * ballR);
         // 为什么这里不这样写就无法让球变白呢?  时间有限, 以后再来探究吧!
-        if (showLine) {
-            g.drawLine(x, y, mousePos.x - windowPos.x, mousePos.y - windowPos.y);
+        if(!showLine){
+            return;
         }
+        //have whiteBall.x,y
+        double mx = mousePos.x - windowPos.x;
+        double my = mousePos.y - windowPos.y;
+        //have mouseX,Y
+        g.drawLine((int) x, (int) y, (int) mx, (int) my);
     }
 }

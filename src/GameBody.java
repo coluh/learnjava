@@ -11,8 +11,10 @@ public class GameBody extends JFrame implements MouseListener, MouseMotionListen
     public final int OY = 92;
     public int tableWidth = 576;
     public int tableHeight = 288;
+    public int holeR = 21;//should be 7
     Ball[] balls = new Ball[21];
     WhiteBall whiteBall;
+    public boolean isPlaying = true;
     //    private Point mousePos;
     public Point windowPos;
     //    private GameBody gB;
@@ -67,8 +69,6 @@ public class GameBody extends JFrame implements MouseListener, MouseMotionListen
         gOff.fillRect(OX, OY, tableWidth, tableHeight);
         gOff.setColor(Color.BLACK);
         for (int ix = 60; ix < 700; ix += 290) {
-            //int holeR = 7;
-            int holeR = 12;
             gOff.fillOval(ix - holeR, 90 - holeR, 2 * holeR, 2 * holeR);
             gOff.fillOval(ix - holeR, 94 + tableHeight - holeR, 2 * holeR, 2 * holeR);
         }
@@ -76,11 +76,11 @@ public class GameBody extends JFrame implements MouseListener, MouseMotionListen
         if(!whiteBall.isInHole){
             whiteBall.paintSelf(gOff);
         }
-        for (int i = 0; i < balls.length; i++) {
-            if(balls[i].isInHole){
+        for (Ball ball : balls) {
+            if (ball.isInHole) {
                 continue;
             }
-            balls[i].paintSelf(gOff);
+            ball.paintSelf(gOff);
         }
         g.drawImage(offScreenImage, 0, 0, null);
     }
@@ -119,8 +119,8 @@ public class GameBody extends JFrame implements MouseListener, MouseMotionListen
         whiteBall.showLine = false;
         //发射
         //mousePos - whiteBall
-        whiteBall.vx = Math.abs(v0 * Math.cos(Math.atan((double) (whiteBall.mousePos.y - whiteBall.windowPos.y - whiteBall.y) / (whiteBall.mousePos.x - whiteBall.windowPos.x - whiteBall.x))));
-        whiteBall.vy = Math.abs(v0 * Math.sin(Math.atan((double) (whiteBall.mousePos.y - whiteBall.windowPos.y - whiteBall.y) / (whiteBall.mousePos.x - whiteBall.windowPos.x - whiteBall.x))));
+        whiteBall.vx = Math.abs(v0 * Math.cos(Math.atan((whiteBall.mousePos.y - whiteBall.windowPos.y - whiteBall.y) / (whiteBall.mousePos.x - whiteBall.windowPos.x - whiteBall.x))));
+        whiteBall.vy = Math.abs(v0 * Math.sin(Math.atan((whiteBall.mousePos.y - whiteBall.windowPos.y - whiteBall.y) / (whiteBall.mousePos.x - whiteBall.windowPos.x - whiteBall.x))));
         if (whiteBall.mousePos.x - whiteBall.windowPos.x - whiteBall.x < 0) {
             whiteBall.vx *= -1;
         }
@@ -141,8 +141,6 @@ public class GameBody extends JFrame implements MouseListener, MouseMotionListen
             whiteBall.isInHole = false;
             whiteBall.x = whiteBall.lastX;
             whiteBall.y = whiteBall.lastY;
-            whiteBall.realX = whiteBall.x;
-            whiteBall.realY = whiteBall.y;
         }
         //
     }
@@ -155,16 +153,22 @@ public class GameBody extends JFrame implements MouseListener, MouseMotionListen
         if (Math.abs(whiteBall.vx) > 0 || Math.abs(whiteBall.vy) > 0) {
             return false;
         }
-        for (int i = 0; i < balls.length; i++) {
-            if(balls[i].isInHole){
+        int numberOfBallsInHole = 0;
+        for (Ball ball : balls) {
+            if (ball.isInHole) {
+                numberOfBallsInHole++;
                 continue;
             }
-            if (Math.abs(balls[i].vx) > 0 || Math.abs(balls[i].vy) > 0) {
+            if (Math.abs(ball.vx) > 0 || Math.abs(ball.vy) > 0) {
                 return false;
             }
         }
+        if(numberOfBallsInHole == balls.length){
+            isPlaying = false;
+        }
         return true;
     }
+
 
     @Override
     public void mouseClicked(MouseEvent e) {
