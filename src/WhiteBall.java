@@ -5,6 +5,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.concurrent.CountDownLatch;
 
 public class WhiteBall extends Ball {
     public Point mousePos;
@@ -12,8 +13,8 @@ public class WhiteBall extends Ball {
     private final GameBody gB;
     Color color = Color.WHITE;
     double lastX, lastY;
-    public boolean whiteOK = false;
     public boolean showLine = false;
+    public final CountDownLatch latchForWhiteBall = new CountDownLatch(1);
     private final MouseListener m1 = new MouseAdapter() {
         @Override
         public void mouseClicked(MouseEvent e) {
@@ -21,7 +22,7 @@ public class WhiteBall extends Ball {
             mousePos = e.getLocationOnScreen();
             x = (double) mousePos.x - windowPos.x;
             y = (double) mousePos.y - windowPos.y;
-            whiteOK = true;
+            latchForWhiteBall.countDown();
 //            System.out.println("Nice");
             gB.removeMouseMotionListener(m2);
             gB.removeMouseListener(m1);

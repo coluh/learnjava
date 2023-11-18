@@ -4,6 +4,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class GameBody extends JFrame implements MouseListener, MouseMotionListener {
 
@@ -17,13 +21,14 @@ public class GameBody extends JFrame implements MouseListener, MouseMotionListen
     public boolean isPlaying = true;
     //    private Point mousePos;
     public Point windowPos;
-    //    private GameBody gB;
-    public final double v0 = 3.0;
+    private CountDownLatch latch;
+    private ScheduledExecutorService schedulerForAim;
+    public final double v0 = 15.0;
     /*
      * 四个要改的地方
      * 1. 初速度
      * 2. u的值
-     * 3. 发射计算中的sleep间隙
+     * 3. 发射计算中的dalay
      * 4. 可忽略的最大速度*/
     private Image offScreenImage;
 
@@ -50,6 +55,11 @@ public class GameBody extends JFrame implements MouseListener, MouseMotionListen
             }
         }
         whiteBall = new WhiteBall(this);
+        try {
+            whiteBall.latchForWhiteBall.await();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -88,33 +98,27 @@ public class GameBody extends JFrame implements MouseListener, MouseMotionListen
     private final MouseListener m1 = new MouseAdapter() {
         @Override
         public void mouseClicked(MouseEvent e) {
-//            super.mouseClicked(e);
-            whiteBall.whiteOK = true;
+            latch.countDown();
+            schedulerForAim.shutdown();
             removeMouseListener(m1);
         }
     };
 
     public void play() {
-        //检测白球放好了没
-        while (!whiteBall.whiteOK) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        whiteBall.whiteOK = false;
+        //
         // 瞄准画线
-        this.addMouseListener(m1);
         whiteBall.showLine = true;
-        while (!whiteBall.whiteOK) {
+        this.addMouseListener(m1);
+        latch = new CountDownLatch(1);
+        schedulerForAim = Executors.newScheduledThreadPool(1);
+        schedulerForAim.scheduleWithFixedDelay(()->{
             whiteBall.mousePos = MouseInfo.getPointerInfo().getLocation();
             this.repaint();
-            try {
-                Thread.sleep(40);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+        }, 0, 40, TimeUnit.MILLISECONDS);
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
         whiteBall.showLine = false;
         //发射
@@ -129,13 +133,22 @@ public class GameBody extends JFrame implements MouseListener, MouseMotionListen
         }
         whiteBall.lastX = whiteBall.x;
         whiteBall.lastY = whiteBall.y;
-        while (!allBallStatic()) {
+        latch = new CountDownLatch(1);
+        ScheduledExecutorService schedulerForShoot = Executors.newScheduledThreadPool(1);
+        schedulerForShoot.scheduleAtFixedRate(()->{
             new PhysicalCompute(this).move();
-            try {
-                Thread.sleep(2);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+            if(allBallStatic()){
+                latch.countDown();
+                schedulerForShoot.shutdown();
             }
+        }, 0, 8, TimeUnit.MILLISECONDS);
+        // 125Hz !!!
+        /* 这里使用WithFixedDelay时出现未知错误, 具体表现为延时莫名变长 */
+        // 故转而选用AtFixedRate
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
         if(whiteBall.isInHole){
             whiteBall.isInHole = false;

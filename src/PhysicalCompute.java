@@ -1,12 +1,14 @@
 public class PhysicalCompute {
     GameBody gB;
-    final double u = 0.003;
+    final double u = 0.01;
+    double minSpeed = 0.005;
     Ball[] balls = new Ball[21 + 1];
 
     public PhysicalCompute(GameBody gB) {
         this.gB = gB;
         System.arraycopy(gB.balls, 0, this.balls, 0, gB.balls.length);
         this.balls[gB.balls.length] = gB.whiteBall;
+        minSpeed *= gB.whiteBall.ballR;
     }
 
     public void move() {
@@ -16,11 +18,11 @@ public class PhysicalCompute {
             }
             ball.x += ball.vx;
             ball.y += ball.vy;
-            ball.ax = ball.afx - u * ball.vx;
-            ball.ay = ball.afy - u * ball.vy;
+            ball.ax = ball.afx - u * ball.vx/* * Math.sqrt(Math.abs(ball.vx))*/;
+            ball.ay = ball.afy - u * ball.vy/* * Math.sqrt(Math.abs(ball.vy))*/;
             ball.vx += ball.ax;
             ball.vy += ball.ay;
-            if (Math.pow(Math.abs(ball.vx), 2) + Math.pow(Math.abs(ball.vy), 2) < 0.005) {
+            if (Math.pow(Math.abs(ball.vx), 2) + Math.pow(Math.abs(ball.vy), 2) < minSpeed) {
                 ball.vx = 0;
                 ball.vy = 0;
             }

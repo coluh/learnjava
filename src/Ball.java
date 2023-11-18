@@ -7,7 +7,7 @@ public class Ball {
     Color color;
     //int score;
     public double vx, vy, ax, ay, afx, afy;
-    boolean isInHole = false;
+    public boolean isInHole = false;
     //int ballScore = color.ordinal();
 
     public Ball(double x, double y, Color color, GameBody gameBody) {
