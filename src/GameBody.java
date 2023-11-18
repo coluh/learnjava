@@ -16,7 +16,7 @@ public class GameBody extends JFrame implements MouseListener, MouseMotionListen
     //    private Point mousePos;
     public Point windowPos;
     //    private GameBody gB;
-    public final double v0 = 2.0;
+    public final double v0 = 3.0;
     /*
      * 四个要改的地方
      * 1. 初速度
@@ -41,6 +41,12 @@ public class GameBody extends JFrame implements MouseListener, MouseMotionListen
         balls[3] = new Ball(OX + 288, OY + 144, Color.BLUE, this);
         balls[4] = new Ball(OX + 432, OY + 144, Color.PINK, this);
         balls[5] = new Ball(OX + 525, OY + 144, Color.BLACK, this);
+        for (int i = 0, k = 6; i < 5; i++) {
+            for (int j = 0; j <= i; j++, k++) {
+                //ballR * gen3 ~= 7
+                balls[k] = new Ball(OX + 442 + 7 * i, OY + 144 - 4 * i + 8 * j, Color.RED, this);
+            }
+        }
         whiteBall = new WhiteBall(this);
     }
 
@@ -67,8 +73,13 @@ public class GameBody extends JFrame implements MouseListener, MouseMotionListen
             gOff.fillOval(ix - holeR, 94 + tableHeight - holeR, 2 * holeR, 2 * holeR);
         }
         //ball
-        whiteBall.paintSelf(gOff);
-        for (int i = 0; i < 6; i++) {
+        if(!whiteBall.isInHole){
+            whiteBall.paintSelf(gOff);
+        }
+        for (int i = 0; i < balls.length; i++) {
+            if(balls[i].isInHole){
+                continue;
+            }
             balls[i].paintSelf(gOff);
         }
         g.drawImage(offScreenImage, 0, 0, null);
@@ -116,6 +127,8 @@ public class GameBody extends JFrame implements MouseListener, MouseMotionListen
         if (whiteBall.mousePos.y - whiteBall.windowPos.y - whiteBall.y < 0) {
             whiteBall.vy *= -1;
         }
+        whiteBall.lastX = whiteBall.x;
+        whiteBall.lastY = whiteBall.y;
         while (!allBallStatic()) {
             new PhysicalCompute(this).move();
             try {
@@ -124,14 +137,28 @@ public class GameBody extends JFrame implements MouseListener, MouseMotionListen
                 throw new RuntimeException(e);
             }
         }
+        if(whiteBall.isInHole){
+            whiteBall.isInHole = false;
+            whiteBall.x = whiteBall.lastX;
+            whiteBall.y = whiteBall.lastY;
+            whiteBall.realX = whiteBall.x;
+            whiteBall.realY = whiteBall.y;
+        }
         //
     }
 
     private boolean allBallStatic() {
+        if(whiteBall.isInHole){
+            whiteBall.vx = 0;
+            whiteBall.vy = 0;
+        }
         if (Math.abs(whiteBall.vx) > 0 || Math.abs(whiteBall.vy) > 0) {
             return false;
         }
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < balls.length; i++) {
+            if(balls[i].isInHole){
+                continue;
+            }
             if (Math.abs(balls[i].vx) > 0 || Math.abs(balls[i].vy) > 0) {
                 return false;
             }

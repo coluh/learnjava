@@ -11,6 +11,7 @@ public class WhiteBall extends Ball {
     public final Point windowPos;
     private final GameBody gB;
     Color color = Color.WHITE;
+    int lastX, lastY;
     public boolean whiteOK = false;
     public boolean showLine = false;
     private final MouseListener m1 = new MouseAdapter() {
@@ -46,7 +47,7 @@ public class WhiteBall extends Ball {
 
     @Override
     public boolean collideWith(Ball that) {
-        return Math.pow(Math.abs(this.x - that.x), 2) + Math.pow(Math.abs(this.y - that.y), 2) < Math.pow(this.ballR * 2, 2);
+        return super.collideWith(that);
     }
 
     @Override
