@@ -1,8 +1,7 @@
 import java.awt.*;
 
 public class Ball {
-    final int ballR = 4;
-    //    final int ballR = 7;
+    final int ballR = 4*2;
     public double x, y;
     Color color;
     //int score;
@@ -18,6 +17,9 @@ public class Ball {
     }
 
     public Ball(GameBody ignoredGameBody) {
+    }
+    public Ball(){
+
     }
 
     public boolean collideWith(Ball that) {

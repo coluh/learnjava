@@ -1,6 +1,6 @@
 public class PhysicalCompute {
     GameBody gB;
-    final double u = 0.01;
+    final double u = 0.007;
     double minSpeed = 0.005;
     Ball[] balls = new Ball[21 + 1];
 

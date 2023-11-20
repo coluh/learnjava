@@ -23,12 +23,12 @@ public class GameBody extends JFrame implements MouseListener, MouseMotionListen
     public Point windowPos;
     private CountDownLatch latch;
     private ScheduledExecutorService schedulerForAim;
-    public final double v0 = 15.0;
+    public final double v0 = 10.0;
     /*
      * 四个要改的地方
      * 1. 初速度
      * 2. u的值
-     * 3. 发射计算中的dalay
+     * 3. 发射计算中的delay
      * 4. 可忽略的最大速度*/
     private Image offScreenImage;
 
@@ -114,7 +114,7 @@ public class GameBody extends JFrame implements MouseListener, MouseMotionListen
         schedulerForAim.scheduleWithFixedDelay(()->{
             whiteBall.mousePos = MouseInfo.getPointerInfo().getLocation();
             this.repaint();
-        }, 0, 40, TimeUnit.MILLISECONDS);
+        }, 0, 10, TimeUnit.MILLISECONDS);
         try {
             latch.await();
         } catch (InterruptedException e) {
